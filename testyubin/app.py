@@ -1,29 +1,28 @@
-from flask import Flask, send_from_directory
+import streamlit as st
+import streamlit.components.v1 as components
 import os
 
-# Flask 애플리케이션 생성
-app = Flask(__name__)
+# 페이지 설정 (타이틀 및 아이콘)
+st.set_page_config(page_title="나만의 룰렛 사이트", page_icon="🎡", layout="wide")
 
-# HTML 파일이 저장된 폴더 경로 설정 (htmls 폴더)
-HTML_FOLDER = 'htmls'
+def main():
+    # HTML 파일이 저장된 경로 설정
+    # 현재 실행 파일(app.py) 위치를 기준으로 htmls/index.html 경로를 찾습니다.
+    current_dir = os.path.dirname(__file__)
+    html_path = os.path.join(current_dir, "htmls", "index.html")
 
-@app.route('/')
-def index():
-    """
-    메인 페이지 접속 시 htmls/index.html 파일을 반환합니다.
-    """
-    return send_from_directory(HTML_FOLDER, 'index.html')
+    try:
+        # index.html 파일 읽기
+        with open(html_path, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        
+        # Streamlit 화면에 HTML 구성 요소 삽입
+        # 높이(height)는 룰렛 판이 충분히 보이도록 800px 정도로 설정했습니다.
+        components.html(html_content, height=900, scrolling=True)
 
-@app.route('/<path:path>')
-def static_proxy(path):
-    """
-    추가적인 정적 파일(이미지, CSS 등)이 있을 경우를 대비한 경로 설정입니다.
-    """
-    return send_from_directory(HTML_FOLDER, path)
+    except FileNotFoundError:
+        st.error(f"오류: '{html_path}' 파일을 찾을 수 없습니다. 폴더 구조를 확인해 주세요.")
+        st.info("구조 예시: app.py 파일이 있는 곳에 'htmls' 폴더가 있고 그 안에 'index.html'이 있어야 합니다.")
 
-if __name__ == '__main__':
-    # 서버 실행 (로컬 환경에서 테스트 가능)
-    # 호스트를 0.0.0.0으로 설정하면 같은 네트워크의 다른 기기에서도 접속할 수 있습니다.
-    print("나만의 룰렛 웹사이트 서버가 시작되었습니다!")
-    print("브라우저에서 http://127.0.0.1:5000 접속하여 확인하세요.")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+if __name__ == "__main__":
+    main()
